@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TateNovel Script Checker / Tuner v10</title>
+<title>TateNovel Script Checker / Tuner v11</title>
 <style>
 :root{--bg:#0f1218;--panel:#171c25;--panel2:#202735;--line:#343e50;--text:#f5f7fb;--muted:#9ba8ba;--accent:#91a8ff;--danger:#ff7d91;--warn:#ffd27d;--ok:#79ddb0}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
@@ -23,7 +23,7 @@ footer{font-size:10px;color:var(--muted);padding:0 12px 12px}
 </head>
 <body>
 <header>
-  <div class="title"><h1>TateNovel Script Checker / Tuner v10</h1><div class="sub">TateNovel Studio v53 用・全文Lint / コマンド検索 / 本文検索 / 数値検索 / 選択一括調整</div></div>
+  <div class="title"><h1>TateNovel Script Checker / Tuner v11</h1><div class="sub">TateNovel Studio v54 対応・Project Text保全 / 全文Lint / コマンド検索 / 本文検索 / 数値検索 / 選択一括調整</div></div>
   <div class="toolbar">
     <label>TXTを開く<input id="fileOpen" type="file" accept=".txt,text/plain"></label>
     <button id="saveBtn" class="good">TXT保存</button>
@@ -53,6 +53,8 @@ footer{font-size:10px;color:var(--muted);padding:0 12px 12px}
       <label class="checkRow"><input id="showIgnoredIssues" type="checkbox"> 見送った項目も表示</label>
       <div class="issueList" id="issues"></div>
     </div></section>
+
+    <section class="card"><h2>v54 Script TXT 情報</h2><div class="body"><div id="projectTextStatus" class="hint">通常テキストとして編集中です。</div><div id="fadeDefaultsStatus" class="hint" style="margin-top:5px">時間省略時: 背景 2秒 / 立ち絵 1秒 / イラスト 1秒 / 音 0秒（v54初期値）</div></div></section>
 
     <section class="card"><h2>コマンド検索・一括調整</h2><div class="body">
       <div class="controls">
@@ -88,15 +90,32 @@ footer{font-size:10px;color:var(--muted);padding:0 12px 12px}
     <div class="editorShell"><div id="lineGutter" class="lineGutter" aria-hidden="true">1</div><textarea id="script" spellcheck="false" wrap="off" placeholder="Script TXTを開くか、ここに貼り付けてください。"></textarea></div>
   </section>
 </main>
-<footer>自動修正は「文法的に高確度な半角スペース不足」だけを対象にします。未認識行や廃止記法は勝手に書き換えません。w と単独行の「、、」を含む時間コマンドに加え、単独行の「、」「。」「br」も前後の文章と一緒に確認できます。話者切替前の「。」抜け候補も検出します。本文検索と、Script TXT内の背景・立ち絵・イラスト設定値検索にも対応します。保存名は「元ファイル名＋サフィックス」で管理します。本文には行番号を表示し、検査・検索結果から該当行へ移動できます。</footer>
+<footer>v54 Project Text（v=2 project-text=1）はヘッダーとMETAを保持し、編集欄にはシナリオ本文だけを表示します。時間省略時はMETA内の背景・立ち絵・イラスト基本フェードを参照し、BGM / SE / VOICEは0秒として表示します。-pict省略時はカテゴリ別時間として扱います。[text] は正式な空文章ブロック記法として認識します。自動修正は高確度なものだけを対象にします。</footer>
 <script>
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),ta=$('script');
 let undo=[],redo=[],lastIssues=[],lastCommands=[],lastParams=[],dirty=false,inputTimer=null;let selectedCommandIds=new Set();
+let projectEnvelope={mode:'plain',header:'',metaBegin:'',metaEnd:'',metaText:'',meta:null,version:0,charAnchor:0};
 const ISSUE_IGNORE_KEY='tatenovelScripterIgnoredV8';let selectedIssueFixIds=new Set(),ignoredIssueIds=new Set();try{ignoredIssueIds=new Set(JSON.parse(localStorage.getItem(ISSUE_IGNORE_KEY)||'[]'))}catch(_){ignoredIssueIds=new Set()}
 const MAX_HISTORY=80;
 function normalizeNL(s){return String(s??'').replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n')}
+const META_BEGIN='#!tatenovel-meta-begin',META_END='#!tatenovel-meta-end';
+function splitProjectText(raw){
+  raw=normalizeNL(raw);const lines=raw.split('\n'),header=lines[0]||'';
+  const hm=header.match(/^#!tatenovel-script\s+v=(\d+)(?:\s+char-anchor=(\d+))?(?:\s+project-text=(\d+))?/i);
+  if(!hm)return {body:raw,envelope:{mode:'plain',header:'',metaBegin:'',metaEnd:'',metaText:'',meta:null,version:0,charAnchor:0}};
+  const version=Number(hm[1])||1,charAnchor=Number(hm[2])||1,b=lines.indexOf(META_BEGIN),e=lines.indexOf(META_END);
+  if(b>=0&&e>b){const metaText=lines.slice(b+1,e).join('\n');let meta=null;try{meta=JSON.parse(metaText)}catch(err){throw new Error('META_PARSE')}const body=lines.slice(e+1).join('\n').replace(/^\n+/,'');return {body,envelope:{mode:'project',header,metaBegin:META_BEGIN,metaEnd:META_END,metaText,meta,version,charAnchor}}}
+  return {body:lines.slice(1).join('\n').replace(/^\n+/,''),envelope:{mode:'header',header,metaBegin:'',metaEnd:'',metaText:'',meta:null,version,charAnchor}};
+}
+function composeProjectText(){const body=normalizeNL(ta.value);if(projectEnvelope.mode==='project')return projectEnvelope.header+'\n'+projectEnvelope.metaBegin+'\n'+projectEnvelope.metaText+'\n'+projectEnvelope.metaEnd+'\n\n'+body;if(projectEnvelope.mode==='header')return projectEnvelope.header+'\n\n'+body;return body}
+function clampFade(v,f){const n=Number(v);return Number.isFinite(n)?Math.max(0,Math.min(10,n)):f}
+function fadeDefaults(){const st=projectEnvelope.meta?.settings||{};return {bg:clampFade(st.defaultBgFade,2),char:clampFade(st.defaultCharaFade,1),illust:clampFade(st.defaultIllustFade,1),audio:0}}
+function effectiveDuration(c){if(c.duration!=null)return c.duration;const d=fadeDefaults();if(c.kind==='bg')return d.bg;if(c.kind==='char')return d.char;if(c.kind==='illust')return d.illust;if(['bgm','se','voice'].includes(c.kind))return 0;return null}
+function projectTextInfo(){const d=fadeDefaults(),p=$('projectTextStatus'),f=$('fadeDefaultsStatus');if(p){if(projectEnvelope.mode==='project'){const fmt=projectEnvelope.meta?.format||'meta';p.textContent=`v${projectEnvelope.version} Project Text / ${fmt}。ヘッダー・METAは保存時にそのまま保持し、下の編集欄はシナリオ本文のみです。`}else if(projectEnvelope.mode==='header')p.textContent=`v${projectEnvelope.version} 旧形式ヘッダーを保持中です。編集欄は本文のみです。`;else p.textContent='通常テキストとして編集中です（METAなし）。'}if(f)f.textContent=`時間省略時: 背景 ${d.bg}秒 / 立ち絵 ${d.char}秒 / イラスト ${d.illust}秒 / BGM・SE・VOICE 0秒${projectEnvelope.meta?.settings?'（TXT設定値）':'（v54初期値）'}`}
+function loadDocumentRaw(raw){const x=splitProjectText(raw);projectEnvelope=x.envelope;ta.value=x.body;selectedCommandIds.clear();selectedIssueFixIds.clear();undo=[];redo=[];updateUndo();dirty=false;projectTextInfo();afterChange(true)}
+
 const FILE_NAME_KEY='tatenovelScripterFileNameV9',FILE_SUFFIX_KEY='tatenovelScripterSuffixV9';
 function cleanFilePart(v){return String(v??'').trim().replace(/[\\/:*?\"<>|]/g,'_')}
 function sourceBaseName(){let n=cleanFilePart($('sourceFileName').value);return n.replace(/\.txt$/i,'')}
@@ -117,6 +136,7 @@ function parseSimple(line,lineNo){const raw=line,t=raw.trim();let m;
   if((m=t.match(/^w (\d+(?:\.\d+)?)$/)))return {kind:'wait',sign:'',target:'w',duration:+m[1],explicit:true,line:lineNo,raw};
   if(t==='、、')return {kind:'rhythm',sign:'',target:'、、',duration:.5,explicit:true,line:lineNo,raw};
   if(/^br$/i.test(t))return {kind:'br',sign:'',target:'br',duration:null,explicit:false,line:lineNo,raw};
+  if(/^\[text\]$/i.test(t))return {kind:'textMarker',sign:'',target:'text',duration:null,explicit:false,line:lineNo,raw};
   if(t==='、')return {kind:'comma',sign:'',target:'、',duration:null,explicit:false,line:lineNo,raw};
   if(t==='。')return {kind:'period',sign:'',target:'。',duration:null,explicit:false,line:lineNo,raw};
   if((m=t.match(/^([+-])([abcd]+)(?: (\d+(?:\.\d+)?))?$/))&&validSlotSet(m[2]))return {kind:'char',sign:m[1],target:[...m[2]].sort().join(''),duration:m[3]==null?null:+m[3],explicit:m[3]!=null,line:lineNo,raw};
@@ -188,7 +208,7 @@ function isSpeakerCommandLine(t){return /^(?:a|b|c|d|p)$/.test(t)||t==='@'||t===
 function speakerNameForCheck(t){if(t==='a')return 'A';if(t==='b')return 'B';if(t==='c')return 'C';if(t==='d')return 'D';if(t==='p')return '主人公';if(t==='@'||t==='＠')return '話者なし';return t.startsWith('@')||t.startsWith('＠')?t.slice(1).trim()||'話者なし':t}
 function isDialogueContentForPageCheck(t){
   if(!t||t==='---'||t.startsWith('//'))return false;
-  if(t==='、'||t==='。'||t==='、、'||/^br$/i.test(t)||/^\[br\]$/i.test(t))return false;
+  if(t==='、'||t==='。'||t==='、、'||/^br$/i.test(t)||/^\[br\]$/i.test(t)||/^\[text\]$/i.test(t))return false;
   if(parseSimple(t,1))return false;
   if(/^\[[^\]]+\]$/.test(t))return false;
   return true;
@@ -238,7 +258,7 @@ function render(){const shown=shownIssues(),errs=shown.filter(x=>x.severity==='e
   const validIssueIds=new Set(lastIssues.map(x=>x.issueId));selectedIssueFixIds=new Set([...selectedIssueFixIds].filter(id=>validIssueIds.has(id)));
   const box=$('issues');box.innerHTML='';if(!shown.length)box.innerHTML='<div class="empty">問題は見つかりませんでした。</div>';else shown.slice(0,300).forEach(x=>{const ignored=ignoredIssueIds.has(x.issueId),canFix=issueCanFix(x);const d=document.createElement('div');d.className='issue '+x.severity+(ignored?' ignored':'');d.innerHTML=`<div class="issueTop"><span class="badge">${ignored?'SKIP':x.severity==='error'?'ERROR':x.severity==='fixable'?'FIX':'CHECK'}</span><span class="lineNo">L${x.line}</span></div><div class="issueCode"></div><div class="issueMsg"></div><div class="issueActions"><label><input data-fix type="checkbox" ${selectedIssueFixIds.has(x.issueId)?'checked':''} ${canFix&&!ignored?'':'disabled'}> 修正する</label><label><input data-ignore type="checkbox" ${ignored?'checked':''}> 問題ないので見送る</label></div>`;d.querySelector('.issueCode').textContent=x.code;d.querySelector('.issueMsg').textContent=x.msg+(x.replacement?' → '+x.replacement:'')+(x.fixAction?.type==='insertBefore'?` → L${x.line}の前に「${x.fixAction.text}」を挿入`:'');const f=d.querySelector('[data-fix]'),ig=d.querySelector('[data-ignore]');f.onchange=()=>{if(f.checked){selectedIssueFixIds.add(x.issueId);if(ig.checked){ig.checked=false;ignoredIssueIds.delete(x.issueId);saveIgnoredIssues()}}else selectedIssueFixIds.delete(x.issueId);render()};ig.onchange=()=>{if(ig.checked){ignoredIssueIds.add(x.issueId);selectedIssueFixIds.delete(x.issueId)}else ignoredIssueIds.delete(x.issueId);saveIgnoredIssues();render()};d.addEventListener('click',e=>{if(!e.target.closest('input,label,button'))gotoLine(x.line)});box.appendChild(d)});
   $('applyCheckedIssues').disabled=![...selectedIssueFixIds].some(id=>lastIssues.some(x=>x.issueId===id&&issueCanFix(x)&&!ignoredIssueIds.has(id)));
-  renderCommands();updateBatchHint();updateStats();
+  renderCommands();updateBatchHint();updateStats();projectTextInfo();
 }
 function applyCheckedIssueFixes(){scan();const targets=lastIssues.filter(x=>selectedIssueFixIds.has(x.issueId)&&issueCanFix(x)&&!ignoredIssueIds.has(x.issueId));if(!targets.length)return;pushHistory();let lines=normalizeNL(ta.value).split('\n');const replacements=targets.filter(x=>x.replacement).sort((a,b)=>b.line-a.line);for(const x of replacements){const raw=lines[x.line-1]??'',lead=(raw.match(/^\s*/)||[''])[0],tail=(raw.match(/\s*$/)||[''])[0];lines[x.line-1]=lead+x.replacement+tail}const inserts=targets.filter(x=>x.fixAction?.type==='insertBefore').sort((a,b)=>b.line-a.line);for(const x of inserts){const idx=Math.max(0,Math.min(lines.length,x.line-1)),raw=lines[idx]??'',lead=(raw.match(/^\s*/)||[''])[0];lines.splice(idx,0,lead+String(x.fixAction.text??''))}ta.value=lines.join('\n');selectedIssueFixIds.clear();dirty=true;afterChange(true)}
 function contextHTML(c){
@@ -249,7 +269,7 @@ function contextHTML(c){
 }
 function isTimeEditable(c){return ['wait','rhythm','char','illust','bg','bgm','pict'].includes(c.kind)}
 function isFadeKind(c){return ['char','illust','bg','bgm','pict'].includes(c.kind)}
-function renderCommands(){const box=$('commandList');box.innerHTML='';const list=lastCommands.filter(matchesFilter);if(!list.length){box.innerHTML='<div class="empty">現在の検索条件に一致するコマンドはありません。</div>';updateSelectedCount();return}list.slice(0,500).forEach(c=>{const editable=isTimeEditable(c);let d='';if(c.kind==='rhythm')d='固定 0.5秒';else if(c.kind==='comma')d='クリック待ち';else if(c.kind==='period')d='クリック待ち＋改ページ';else if(c.kind==='br')d='表示用空行';else if(c.kind==='se'||c.kind==='voice')d='時間指定なし';else if(c.duration==null)d='時間省略';else d=`${c.duration}秒`;const signText=c.sign?`符号 ${c.sign}`:'符号なし';const div=document.createElement('div');div.className='commandRow'+(selectedCommandIds.has(c.id)?' selected':'');div.innerHTML=`<div class="rowTop"><input type="checkbox" ${selectedCommandIds.has(c.id)?'checked':''} ${editable?'':'disabled title="時間変更の対象外"'}><code></code><span class="lineNo">L${c.line}</span></div><div class="muted">${labelKind(c.kind)} / ${signText} / ${d}${c.inline?' / 本文内':''}</div>`;div.querySelector('code').textContent=c.kind==='rhythm'?'、、':c.raw.trim();const cb=div.querySelector('input');cb.onchange=()=>{if(cb.checked)selectedCommandIds.add(c.id);else selectedCommandIds.delete(c.id);div.classList.toggle('selected',cb.checked);updateSelectedCount();updateBatchHint()};div.appendChild(contextHTML(c));div.addEventListener('click',e=>{if(e.target.tagName!=='INPUT')gotoLine(c.line)});box.appendChild(div)});updateSelectedCount()}
+function renderCommands(){const box=$('commandList');box.innerHTML='';const list=lastCommands.filter(matchesFilter);if(!list.length){box.innerHTML='<div class="empty">現在の検索条件に一致するコマンドはありません。</div>';updateSelectedCount();return}list.slice(0,500).forEach(c=>{const editable=isTimeEditable(c);let d='';if(c.kind==='rhythm')d='固定 0.5秒';else if(c.kind==='comma')d='クリック待ち';else if(c.kind==='period')d='クリック待ち＋改ページ';else if(c.kind==='br')d='表示用空行';else if(c.kind==='pict'&&c.duration==null){const fd=fadeDefaults();d=`時間省略 → 背景 ${fd.bg}秒 / 立ち絵 ${fd.char}秒 / イラスト ${fd.illust}秒`}else if(c.duration==null&&['bg','char','illust','bgm','se','voice'].includes(c.kind))d=`時間省略 → 実効 ${effectiveDuration(c)}秒`;else if(c.duration==null)d='時間省略';else d=`${c.duration}秒`;const signText=c.sign?`符号 ${c.sign}`:'符号なし';const div=document.createElement('div');div.className='commandRow'+(selectedCommandIds.has(c.id)?' selected':'');div.innerHTML=`<div class="rowTop"><input type="checkbox" ${selectedCommandIds.has(c.id)?'checked':''} ${editable?'':'disabled title="時間変更の対象外"'}><code></code><span class="lineNo">L${c.line}</span></div><div class="muted">${labelKind(c.kind)} / ${signText} / ${d}${c.inline?' / 本文内':''}</div>`;div.querySelector('code').textContent=c.kind==='rhythm'?'、、':c.raw.trim();const cb=div.querySelector('input');cb.onchange=()=>{if(cb.checked)selectedCommandIds.add(c.id);else selectedCommandIds.delete(c.id);div.classList.toggle('selected',cb.checked);updateSelectedCount();updateBatchHint()};div.appendChild(contextHTML(c));div.addEventListener('click',e=>{if(e.target.tagName!=='INPUT')gotoLine(c.line)});box.appendChild(div)});updateSelectedCount()}
 function labelKind(k){return ({wait:'w 待機',rhythm:'、、 リズム待機',comma:'、 クリック待ち',period:'。 クリック待ち＋改ページ',br:'br 表示用空行',char:'立ち絵',illust:'イラスト',bg:'背景',bgm:'BGM',se:'SE',voice:'VOICE',pict:'全画像透過'})[k]||k}
 function num(v,d){const n=Number(v);return Number.isFinite(n)?n:d}
 function matchesFilter(c){const k=$('filterKind').value,s=$('filterSign').value,d=$('filterDuration').value,secs=num($('filterSeconds').value,NaN);if(!['wait','rhythm','comma','period','br','char','illust','bg','bgm','se','voice','pict'].includes(c.kind))return false;
@@ -263,7 +283,7 @@ function matchesFilter(c){const k=$('filterKind').value,s=$('filterSign').value,
   if(d==='exact'&&!(isTimeEditable(c)&&c.duration!=null&&Number.isFinite(secs)&&Math.abs(c.duration-secs)<1e-9))return false;
   return true}
 function updateSelectedCount(){const n=[...selectedCommandIds].filter(id=>lastCommands.some(c=>c.id===id)).length;$('selectedCount').textContent=`${n}件選択`}
-function updateBatchHint(){const visible=lastCommands.filter(matchesFilter),selected=visible.filter(c=>selectedCommandIds.has(c.id)&&isTimeEditable(c));const waitN=visible.filter(c=>c.kind==='wait').length,omitN=visible.filter(c=>isFadeKind(c)&&c.duration==null).length;$('batchHint').textContent=`検索結果 ${visible.length}件（w ${waitN}件 / 時間省略 ${omitN}件）・時間変更チェック済み ${selected.length}件。w は待機秒数を変更。「、、」は0.5秒以外へ変更すると w 秒数へ変換します。「、」「。」は検索のみです。`;$('batchBtn').disabled=!selected.length}
+function updateBatchHint(){const visible=lastCommands.filter(matchesFilter),selected=visible.filter(c=>selectedCommandIds.has(c.id)&&isTimeEditable(c));const waitN=visible.filter(c=>c.kind==='wait').length,omitN=visible.filter(c=>isFadeKind(c)&&c.duration==null).length;$('batchHint').textContent=`検索結果 ${visible.length}件（w ${waitN}件 / 時間省略 ${omitN}件）・時間変更チェック済み ${selected.length}件。時間省略はv54のカテゴリ別基本値を表示します。-pict省略時は背景・立ち絵・イラストで実効時間が異なります。w は待機秒数を変更。「、、」は0.5秒以外へ変更すると w 秒数へ変換します。`;$('batchBtn').disabled=!selected.length}
 function buildCommand(c,newD){const d=String(newD);if(c.kind==='wait')return 'w '+d;if(c.kind==='rhythm')return Number(newD)===0.5?'、、':'w '+d;if(c.kind==='char')return c.sign+c.target+' '+d;if(c.kind==='illust')return c.sign+'il '+c.target+' '+d;if(c.kind==='bg')return c.sign+'bg '+d;if(c.kind==='bgm')return c.sign+'bgm '+d;if(c.kind==='pict')return '-pict '+d;return c.raw.trim()}
 function batchEdit(){scan();const newD=Math.max(0,num($('newDuration').value,0)),targets=lastCommands.filter(c=>matchesFilter(c)&&selectedCommandIds.has(c.id)&&isTimeEditable(c));if(!targets.length)return;pushHistory();const lines=normalizeNL(ta.value).split('\n');const byLine=new Map();for(const c of targets){if(!byLine.has(c.line))byLine.set(c.line,[]);byLine.get(c.line).push(c)}for(const [line,cs] of byLine){let raw=lines[line-1];for(const c of cs.sort((a,b)=>(b.colStart??0)-(a.colStart??0))){const repl=buildCommand(c,newD);if(c.kind==='rhythm'&&c.inline){raw=raw.slice(0,c.colStart)+repl+raw.slice(c.colEnd)}else{const lead=(raw.match(/^\s*/)||[''])[0],tail=(raw.match(/\s*$/)||[''])[0];raw=lead+repl+tail}}lines[line-1]=raw}ta.value=lines.join('\n');selectedCommandIds.clear();dirty=true;afterChange(true)}
 function applySafeFixes(){scan();const fixes=new Map(lastIssues.filter(x=>x.severity==='fixable'&&x.replacement).map(x=>[x.line,x]));if(!fixes.size)return;pushHistory();const lines=normalizeNL(ta.value).split('\n');for(const [line,x] of fixes){const raw=lines[line-1],lead=(raw.match(/^\s*/)||[''])[0],tail=(raw.match(/\s*$/)||[''])[0];lines[line-1]=lead+x.replacement+tail}ta.value=lines.join('\n');dirty=true;afterChange(true)}
@@ -275,11 +295,12 @@ $('scanBtn').onclick=scan;$('fixSafeBtn').onclick=applySafeFixes;$('batchBtn').o
 $('textSearch').oninput=renderTextSearch;$('searchCase').onchange=renderTextSearch;$('textSearchClear').onclick=()=>{$('textSearch').value='';renderTextSearch()};
 ['paramKind','paramSlot'].forEach(id=>$(id).onchange=renderParams);$('paramQuery').oninput=renderParams;
 $('undoBtn').onclick=()=>{if(!undo.length)return;redo.push(ta.value);ta.value=undo.pop();dirty=true;afterChange(true);updateUndo()};$('redoBtn').onclick=()=>{if(!redo.length)return;undo.push(ta.value);ta.value=redo.pop();dirty=true;afterChange(true);updateUndo()};
-$('clearBtn').onclick=()=>{if(!ta.value||confirm('編集中のスクリプトをクリアしますか？'))setText('')};
-$('fileOpen').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;const raw=normalizeNL(await f.text());pushHistory();ta.value=raw;$('sourceFileName').value=f.name;updateOutputName();dirty=false;afterChange(true);e.target.value=''};
-$('saveBtn').onclick=()=>{const name=outputFileName();if(!name){$('sourceFileName').focus();alert('元ファイル名を入力してください。TXTを開いた場合は自動入力されます。コピペの場合は任意の元ファイル名を入力してください。');return}const blob=new Blob(['\uFEFF'+normalizeNL(ta.value)],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},0);dirty=false;updateStats()};
+$('clearBtn').onclick=()=>{if(!ta.value||confirm('編集中のスクリプトをクリアしますか？')){projectEnvelope={mode:'plain',header:'',metaBegin:'',metaEnd:'',metaText:'',meta:null,version:0,charAnchor:0};setText('');projectTextInfo()}};
+$('fileOpen').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{loadDocumentRaw(await f.text());$('sourceFileName').value=f.name;updateOutputName()}catch(err){if(err?.message==='META_PARSE')alert('v54 Script TXTのMETA JSONを解析できませんでした。ファイルは開いていません。');else alert('TXTを読み込めませんでした。')}e.target.value=''};
+$('saveBtn').onclick=()=>{const name=outputFileName();if(!name){$('sourceFileName').focus();alert('元ファイル名を入力してください。TXTを開いた場合は自動入力されます。コピペの場合は任意の元ファイル名を入力してください。');return}const blob=new Blob(['\uFEFF'+composeProjectText()],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},0);dirty=false;updateStats()};
+ta.addEventListener('paste',e=>{const txt=e.clipboardData?.getData('text/plain')||'';if(/^\uFEFF?#!tatenovel-script\s+v=/i.test(txt.trimStart())&&(!ta.value||confirm('貼り付けたScript TXTのヘッダー・METAを分離して読み込みますか？'))){e.preventDefault();try{loadDocumentRaw(txt)}catch(err){alert(err?.message==='META_PARSE'?'貼り付け内容のMETA JSONを解析できませんでした。':'貼り付けたScript TXTを解析できませんでした。')}}});
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
-updateUndo();scan();
+updateUndo();projectTextInfo();scan();
 })();
 </script>
 </body>
