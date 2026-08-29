@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TateNovel Script Checker / Tuner v11</title>
+<title>TateNovel Script Workshop v13</title>
 <style>
 :root{--bg:#0f1218;--panel:#171c25;--panel2:#202735;--line:#343e50;--text:#f5f7fb;--muted:#9ba8ba;--accent:#91a8ff;--danger:#ff7d91;--warn:#ffd27d;--ok:#79ddb0}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans JP",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
@@ -17,13 +17,16 @@ main{display:flex;flex-direction:column;gap:12px;padding:12px}.editorPane,.sideP
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:7px}.controls .full{grid-column:1/-1}label.small{font-size:10px;color:var(--muted)}select,input[type=number],input[type=text]{width:100%;border:1px solid var(--line);background:#10151d;color:#fff;border-radius:8px;padding:8px}.action{width:100%;margin-top:8px;border:1px solid var(--line);background:#252d3b;color:#fff;border-radius:9px;padding:9px;font-weight:800}.action.primary{background:var(--accent);color:#10141e;border-color:transparent}.action:disabled{opacity:.45;cursor:not-allowed}.hint{font-size:10px;color:var(--muted);line-height:1.55;margin-top:7px}.checkRow{display:flex;align-items:center;gap:7px;font-size:11px;color:#cfd7e5;margin-bottom:8px}.checkRow input{width:auto}
 .commandRow{border:1px solid var(--line);border-radius:9px;background:#11161e;padding:8px;font-size:11px}.commandRow.selected{border-color:var(--accent);box-shadow:0 0 0 1px #91a8ff33 inset}.commandRow .rowTop{display:flex;align-items:center;gap:8px}.commandRow code{font-size:11px;font-weight:800}.commandRow input[type=checkbox]{width:auto;flex:0 0 auto}.commandRow .lineNo{margin-left:auto}.context{margin-top:7px;border-top:1px solid #293241;padding-top:6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5}.contextLine{display:grid;grid-template-columns:38px 1fr;gap:6px;min-width:0}.contextLine .ln{color:#718096;text-align:right;user-select:none}.contextLine .tx{white-space:pre-wrap;word-break:break-word;color:#aeb9ca}.contextLine.current .ln{color:#cbd5ff;font-weight:900}.contextLine.current .tx{color:#f5f7fb;font-weight:700;background:#1b2230;border-radius:5px;padding:1px 4px}.selectTools{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}.selectTools button{border:1px solid var(--line);background:#252d3b;color:#fff;border-radius:8px;padding:6px 8px;font-size:10px}.muted{color:var(--muted)}
 .searchList,.paramList{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow:auto}.searchHit,.paramHit{border:1px solid var(--line);border-radius:9px;background:#11161e;padding:8px;font-size:11px;cursor:pointer}.searchHit:hover,.paramHit:hover{border-color:#65738b}.searchHit .hitTop,.paramHit .hitTop{display:flex;gap:8px;align-items:center}.searchHit mark{background:#66551f;color:#fff4bb;border-radius:3px;padding:0 2px}.paramTags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.paramTag{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #354155;background:#161d28;border-radius:6px;padding:2px 5px;color:#dbe3f1}.searchTools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}.searchTools button{border:1px solid var(--line);background:#252d3b;color:#fff;border-radius:8px;padding:8px 10px}.paramFilters{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}.paramFilters .full{grid-column:1/-1}
+
+.replaceActions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0}.replaceActions button{border:1px solid var(--line);background:#252d3b;color:#fff;border-radius:8px;padding:8px}.replaceActions .primary{background:var(--accent);color:#10141e;border-color:transparent;font-weight:900}
+.manualOverlay{position:fixed;inset:0;z-index:100;background:#000c;display:none;align-items:center;justify-content:center;padding:18px}.manualOverlay.open{display:flex}.manualPanel{width:min(980px,100%);max-height:92vh;overflow:auto;background:#151a22;border:1px solid var(--line);border-radius:16px;padding:14px}.manualHead{position:sticky;top:-14px;z-index:2;background:#151a22f5;backdrop-filter:blur(8px);display:flex;gap:10px;align-items:center;padding:14px 0 10px}.manualHead h2{margin:0;font-size:16px;flex:1}.manualHead button{border:1px solid var(--line);background:#252d3b;color:#fff;border-radius:8px;padding:8px 11px}.manualSearch{margin-bottom:10px}.manualTabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.manualTabs button{border:1px solid var(--line);background:#202735;color:#fff;border-radius:999px;padding:6px 10px;font-size:11px}.manualTabs button.active{background:var(--accent);color:#10141e;border-color:transparent;font-weight:900}.manualGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.manualItem{border:1px solid var(--line);border-radius:10px;background:#10151d;padding:9px}.manualItem code{font-size:12px;color:#e2e8ff}.manualItem b{font-size:11px;margin-left:7px}.manualItem p{font-size:10px;line-height:1.55;color:#bec8d8;margin:6px 0 0}.manualItem .tag{font-size:9px;color:var(--muted);margin-top:5px}.manualNote{font-size:10px;color:var(--muted);line-height:1.55;margin:6px 0 12px}.manualEmpty{text-align:center;color:var(--muted);padding:25px}@media(max-width:700px){.manualGrid{grid-template-columns:1fr}.manualOverlay{padding:0}.manualPanel{height:100dvh;max-height:none;border-radius:0;border:0}.replaceActions{grid-template-columns:1fr}}
 footer{font-size:10px;color:var(--muted);padding:0 12px 12px}
 @media(max-width:900px){header{position:static}.sidePane{display:block}.sidePane .card{margin-bottom:10px}.summaryGrid{grid-template-columns:repeat(4,1fr)}textarea#script{min-height:65vh}}
 </style>
 </head>
 <body>
 <header>
-  <div class="title"><h1>TateNovel Script Checker / Tuner v11</h1><div class="sub">TateNovel Studio v54 対応・Project Text保全 / 全文Lint / コマンド検索 / 本文検索 / 数値検索 / 選択一括調整</div></div>
+  <div class="title"><h1>TateNovel Script Workshop v13</h1><div class="sub">TateNovel Studio v56 対応・Project Text保全 / Lint / 検索・置換 / クリップボード / コマンド調整 / 数値検索 / 内蔵マニュアル</div></div>
   <div class="toolbar">
     <label>TXTを開く<input id="fileOpen" type="file" accept=".txt,text/plain"></label>
     <button id="saveBtn" class="good">TXT保存</button>
@@ -31,7 +34,10 @@ footer{font-size:10px;color:var(--muted);padding:0 12px 12px}
     <button id="fixSafeBtn">安全な修正を一括適用</button>
     <button id="undoBtn">↶ Undo</button>
     <button id="redoBtn">↷ Redo</button>
+    <button id="copyAllBtn">📋 全コピー</button>
+    <button id="pasteAllBtn">📥 全ペースト</button>
     <button id="clearBtn" class="danger">クリア</button>
+    <button id="manualBtn">📖 コマンド一覧 / マニュアル</button>
   </div>
   <div class="fileNameBar">
     <label>元ファイル名<input id="sourceFileName" type="text" placeholder="例: scene01.txt（コピペ時はここに入力）"></label>
@@ -54,11 +60,11 @@ footer{font-size:10px;color:var(--muted);padding:0 12px 12px}
       <div class="issueList" id="issues"></div>
     </div></section>
 
-    <section class="card"><h2>v54 Script TXT 情報</h2><div class="body"><div id="projectTextStatus" class="hint">通常テキストとして編集中です。</div><div id="fadeDefaultsStatus" class="hint" style="margin-top:5px">時間省略時: 背景 2秒 / 立ち絵 1秒 / イラスト 1秒 / 音 0秒（v54初期値）</div></div></section>
+    <section class="card"><h2>v56 Script TXT 情報</h2><div class="body"><div id="projectTextStatus" class="hint">通常テキストとして編集中です。</div><div id="fadeDefaultsStatus" class="hint" style="margin-top:5px">時間省略時: 背景 2秒 / 立ち絵 1秒 / イラスト 1秒 / 音 0秒（v54初期値）</div></div></section>
 
     <section class="card"><h2>コマンド検索・一括調整</h2><div class="body">
       <div class="controls">
-        <div><label class="small">種類</label><select id="filterKind"><option value="all">検出コマンドすべて</option><option value="time">時間を持つコマンドすべて</option><option value="wait">w 待機</option><option value="rhythm">、、 リズム待機 (0.5秒)</option><option value="comma">、 クリック待ち</option><option value="period">。 クリック待ち＋改ページ</option><option value="br">br 表示用空行</option><option value="fade">フェード系すべて</option><option value="char">立ち絵 +/-</option><option value="illust">イラスト +/-</option><option value="bg">背景 +/-</option><option value="bgm">BGM +/-</option><option value="se">SE +/-</option><option value="voice">VOICE +/-</option><option value="pict">-pict</option></select></div>
+        <div><label class="small">種類</label><select id="filterKind"><option value="all">検出コマンドすべて</option><option value="time">時間を持つコマンドすべて</option><option value="wait">w 待機</option><option value="rhythm">、、 リズム待機 (0.5秒)</option><option value="comma">、 クリック待ち</option><option value="period">。 クリック待ち＋改ページ</option><option value="autopage">。。 待たずに改ページ</option><option value="shake">shake 揺れ</option><option value="br">br 表示用空行</option><option value="fade">フェード系すべて</option><option value="char">立ち絵 +/-</option><option value="illust">イラスト +/-</option><option value="bg">背景 +/-</option><option value="bgm">BGM +/-</option><option value="se">SE +/-</option><option value="voice">VOICE +/-</option><option value="pict">-pict</option></select></div>
         <div><label class="small">符号</label><select id="filterSign"><option value="any">すべて</option><option value="none">符号なし（w / 、、 / 、 / 。）</option><option value="+">+ のみ</option><option value="-">- のみ</option></select></div>
         <div><label class="small">現在の時間</label><select id="filterDuration"><option value="any">すべて</option><option value="omitted">時間省略</option><option value="explicit">時間指定あり</option><option value="exact">秒数が一致</option></select></div>
         <div><label class="small">検索する秒数</label><input id="filterSeconds" type="number" min="0" step="0.1" value="0.5"></div>
@@ -70,9 +76,11 @@ footer{font-size:10px;color:var(--muted);padding:0 12px 12px}
 
     <section class="card"><h2>文脈付き・コマンド一覧</h2><div class="body"><div class="selectTools"><button id="checkFiltered">表示対象を全選択</button><button id="uncheckAll">全解除</button><span class="muted" id="selectedCount">0件選択</span></div><div id="commandList" class="commandList"></div></div></section>
 
-    <section class="card"><h2>文章検索</h2><div class="body">
-      <div class="searchTools"><input id="textSearch" type="text" placeholder="本文・コメント・コマンドを検索"><button id="textSearchClear">クリア</button></div>
+    <section class="card"><h2>文字列の検索・置換</h2><div class="body">
+      <div class="searchTools"><input id="textSearch" type="text" placeholder="検索する文字列"><button id="textSearchClear">クリア</button></div>
+      <div class="searchTools" style="margin-top:7px"><input id="replaceText" type="text" placeholder="置換後の文字列"><button id="findNextBtn">次へ</button></div>
       <label class="checkRow" style="margin-top:8px"><input id="searchCase" type="checkbox"> 大文字・小文字を区別</label>
+      <div class="replaceActions"><button id="replaceOneBtn">現在の1件を置換</button><button id="replaceAllBtn" class="primary">すべて置換</button></div>
       <div class="hint" id="textSearchCount">検索語を入力してください。</div><div id="textSearchList" class="searchList"></div>
     </div></section>
 
@@ -90,7 +98,14 @@ footer{font-size:10px;color:var(--muted);padding:0 12px 12px}
     <div class="editorShell"><div id="lineGutter" class="lineGutter" aria-hidden="true">1</div><textarea id="script" spellcheck="false" wrap="off" placeholder="Script TXTを開くか、ここに貼り付けてください。"></textarea></div>
   </section>
 </main>
-<footer>v54 Project Text（v=2 project-text=1）はヘッダーとMETAを保持し、編集欄にはシナリオ本文だけを表示します。時間省略時はMETA内の背景・立ち絵・イラスト基本フェードを参照し、BGM / SE / VOICEは0秒として表示します。-pict省略時はカテゴリ別時間として扱います。[text] は正式な空文章ブロック記法として認識します。自動修正は高確度なものだけを対象にします。</footer>
+<footer>v56 Project Text（v=2 project-text=1）はヘッダーとMETAを保持し、編集欄にはシナリオ本文だけを表示します。時間省略時はMETA内の背景・立ち絵・イラスト基本フェードを参照し、BGM / SE / VOICEは0秒として表示します。-pict省略時はカテゴリ別時間として扱います。[text] は正式な空文章ブロック記法として認識します。自動修正は高確度なものだけを対象にします。</footer>
+
+<div id="manualOverlay" class="manualOverlay" aria-hidden="true"><div class="manualPanel">
+  <div class="manualHead"><h2>TateNovel Studio v56 コマンド一覧 / 簡易マニュアル</h2><button id="manualClose">閉じる</button></div>
+  <div class="manualNote">Studio v56 のシナリオ記法を、制作時に引ける早見表としてまとめています。検索欄には「改ページ」「背景」「shake」「音」などを入力できます。</div>
+  <input id="manualSearch" class="manualSearch" type="search" placeholder="マニュアル内を検索">
+  <div id="manualTabs" class="manualTabs"></div><div id="manualGrid" class="manualGrid"></div>
+</div></div>
 <script>
 (()=>{
 'use strict';
@@ -139,6 +154,8 @@ function parseSimple(line,lineNo){const raw=line,t=raw.trim();let m;
   if(/^\[text\]$/i.test(t))return {kind:'textMarker',sign:'',target:'text',duration:null,explicit:false,line:lineNo,raw};
   if(t==='、')return {kind:'comma',sign:'',target:'、',duration:null,explicit:false,line:lineNo,raw};
   if(t==='。')return {kind:'period',sign:'',target:'。',duration:null,explicit:false,line:lineNo,raw};
+  if(t==='。。')return {kind:'autopage',sign:'',target:'。。',duration:null,explicit:false,line:lineNo,raw};
+  if((m=t.match(/^\[shake(?: +(bg))?(?: +(\d+(?:\.\d+)?))?(?: +(\d+(?:\.\d+)?))?\]$/i)))return {kind:'shake',sign:'',target:m[1]?'bg':'scene',duration:m[2]==null?.5:+m[2],strength:m[3]==null?5:+m[3],explicit:m[2]!=null||m[3]!=null,line:lineNo,raw};
   if((m=t.match(/^([+-])([abcd]+)(?: (\d+(?:\.\d+)?))?$/))&&validSlotSet(m[2]))return {kind:'char',sign:m[1],target:[...m[2]].sort().join(''),duration:m[3]==null?null:+m[3],explicit:m[3]!=null,line:lineNo,raw};
   if((m=t.match(/^([+-])il ([abcd]+)(?: (\d+(?:\.\d+)?))?$/))&&validSlotSet(m[2]))return {kind:'illust',sign:m[1],target:[...m[2]].sort().join(''),duration:m[3]==null?null:+m[3],explicit:m[3]!=null,line:lineNo,raw};
   if((m=t.match(/^([+-])bg(?: (\d+(?:\.\d+)?))?$/)))return {kind:'bg',sign:m[1],target:'bg',duration:m[2]==null?null:+m[2],explicit:m[2]!=null,line:lineNo,raw};
@@ -199,6 +216,13 @@ function renderTextSearch(){
   if(!hits.length){box.innerHTML='<div class="empty">一致する文章はありません。</div>';return}
   hits.slice(0,500).forEach(h=>{const div=document.createElement('div');div.className='searchHit';div.innerHTML=`<div class="hitTop"><b>L${h.line}</b><span class="muted">前後2行</span></div>`;div.appendChild(contextForLine(h.line,q,cs));div.onclick=()=>gotoLine(h.line);box.appendChild(div)});
 }
+function textMatches(){
+  const q=$('textSearch').value;if(!q)return[];const cs=$('searchCase').checked,text=normalizeNL(ta.value),hay=cs?text:text.toLowerCase(),needle=cs?q:q.toLowerCase(),out=[];let at=0;
+  while((at=hay.indexOf(needle,at))>=0){const line=text.slice(0,at).split('\n').length;out.push({start:at,end:at+q.length,line});at+=Math.max(1,q.length)}return out;
+}
+function findNextMatch(){const hits=textMatches();if(!hits.length)return;const p=ta.selectionEnd||0;let h=hits.find(x=>x.start>=p);if(!h)h=hits[0];ta.focus();ta.setSelectionRange(h.start,h.end);ta.scrollTop=Math.max(0,(h.line-4)*parseFloat(getComputedStyle(ta).lineHeight||23));renderLineNumbers()}
+function replaceOne(){const q=$('textSearch').value;if(!q)return;const cs=$('searchCase').checked,sel=ta.value.slice(ta.selectionStart,ta.selectionEnd),ok=cs?sel===q:sel.toLowerCase()===q.toLowerCase();if(!ok){findNextMatch();return}pushHistory();const a=ta.selectionStart,z=ta.selectionEnd,r=$('replaceText').value;ta.value=ta.value.slice(0,a)+r+ta.value.slice(z);ta.setSelectionRange(a,a+r.length);dirty=true;afterChange(true);findNextMatch()}
+function replaceAll(){const q=$('textSearch').value;if(!q)return;const hits=textMatches();if(!hits.length)return;const r=$('replaceText').value;if(!confirm(`${hits.length}件を置換しますか？\n\n「${q}」 → 「${r}」`))return;pushHistory();let s=ta.value;for(const h of hits.slice().reverse())s=s.slice(0,h.start)+r+s.slice(h.end);ta.value=s;dirty=true;afterChange(true)}
 function contextForLine(line,q,caseSensitive){const lines=normalizeNL(ta.value).split('\n'),from=Math.max(1,line-2),to=Math.min(lines.length,line+2),wrap=document.createElement('div');wrap.className='context';for(let n=from;n<=to;n++){const row=document.createElement('div');row.className=n===line?'contextLine current':'contextLine';const ln=document.createElement('span');ln.className='ln';ln.textContent=n;const tx=document.createElement('span');tx.className='tx';tx.textContent=lines[n-1]||'';row.append(ln,tx);wrap.appendChild(row)}return wrap}
 function paramSearchText(p){return [p.kind,p.slot,p.cue,p.name,p.raw,...Object.entries(p.attrs||{}).flatMap(([k,v])=>[k,`${k}=${v}`,String(v)])].join(' ').toLowerCase()}
 function renderParams(){const box=$('paramList');box.innerHTML='';const kind=$('paramKind').value,slot=$('paramSlot').value,q=$('paramQuery').value.trim().toLowerCase();let list=lastParams.filter(p=>(kind==='all'||p.kind===kind)&&(slot==='all'||p.slot===slot)&&(!q||paramSearchText(p).includes(q)));$('paramCount').textContent=`${list.length}件 / 全${lastParams.length}件。Script TXTに明示された値のみ表示します。`;
@@ -208,7 +232,7 @@ function isSpeakerCommandLine(t){return /^(?:a|b|c|d|p)$/.test(t)||t==='@'||t===
 function speakerNameForCheck(t){if(t==='a')return 'A';if(t==='b')return 'B';if(t==='c')return 'C';if(t==='d')return 'D';if(t==='p')return '主人公';if(t==='@'||t==='＠')return '話者なし';return t.startsWith('@')||t.startsWith('＠')?t.slice(1).trim()||'話者なし':t}
 function isDialogueContentForPageCheck(t){
   if(!t||t==='---'||t.startsWith('//'))return false;
-  if(t==='、'||t==='。'||t==='、、'||/^br$/i.test(t)||/^\[br\]$/i.test(t)||/^\[text\]$/i.test(t))return false;
+  if(t==='、'||t==='。'||t==='。。'||t==='、、'||/^br$/i.test(t)||/^\[br\]$/i.test(t)||/^\[text\]$/i.test(t))return false;
   if(parseSimple(t,1))return false;
   if(/^\[[^\]]+\]$/.test(t))return false;
   return true;
@@ -224,7 +248,7 @@ function detectMissingPageBreaks(lines,issues){
       }
       speaker=t;textSinceBreak=false;clickWaitAfterText=false;lastTextLine=0;continue;
     }
-    if(t==='。'){textSinceBreak=false;clickWaitAfterText=false;lastTextLine=0;continue}
+    if(t==='。'||t==='。。'){textSinceBreak=false;clickWaitAfterText=false;lastTextLine=0;continue}
     if(t==='、'){if(textSinceBreak)clickWaitAfterText=true;continue}
     if(isDialogueContentForPageCheck(t)&&speaker){textSinceBreak=true;clickWaitAfterText=false;lastTextLine=n}
   }
@@ -232,7 +256,7 @@ function detectMissingPageBreaks(lines,issues){
 function scan(){
   const text=normalizeNL(ta.value),lines=text.split('\n'),issues=[],commands=[];
   lines.forEach((raw,i)=>{const n=i+1,t=raw.trim(),simple=parseSimple(raw,n);
-    if(simple&&['char','illust','bg','bgm','pict','wait','se','voice','rhythm','comma','period','br'].includes(simple.kind)){
+    if(simple&&['char','illust','bg','bgm','pict','wait','se','voice','rhythm','comma','period','autopage','br','shake'].includes(simple.kind)){
       const lead=(raw.match(/^\s*/)||[''])[0].length;
       commands.push(Object.assign(simple,{id:`L${n}:simple`,colStart:lead,colEnd:raw.length-(raw.match(/\s*$/)||[''])[0].length}));
     }
@@ -269,10 +293,10 @@ function contextHTML(c){
 }
 function isTimeEditable(c){return ['wait','rhythm','char','illust','bg','bgm','pict'].includes(c.kind)}
 function isFadeKind(c){return ['char','illust','bg','bgm','pict'].includes(c.kind)}
-function renderCommands(){const box=$('commandList');box.innerHTML='';const list=lastCommands.filter(matchesFilter);if(!list.length){box.innerHTML='<div class="empty">現在の検索条件に一致するコマンドはありません。</div>';updateSelectedCount();return}list.slice(0,500).forEach(c=>{const editable=isTimeEditable(c);let d='';if(c.kind==='rhythm')d='固定 0.5秒';else if(c.kind==='comma')d='クリック待ち';else if(c.kind==='period')d='クリック待ち＋改ページ';else if(c.kind==='br')d='表示用空行';else if(c.kind==='pict'&&c.duration==null){const fd=fadeDefaults();d=`時間省略 → 背景 ${fd.bg}秒 / 立ち絵 ${fd.char}秒 / イラスト ${fd.illust}秒`}else if(c.duration==null&&['bg','char','illust','bgm','se','voice'].includes(c.kind))d=`時間省略 → 実効 ${effectiveDuration(c)}秒`;else if(c.duration==null)d='時間省略';else d=`${c.duration}秒`;const signText=c.sign?`符号 ${c.sign}`:'符号なし';const div=document.createElement('div');div.className='commandRow'+(selectedCommandIds.has(c.id)?' selected':'');div.innerHTML=`<div class="rowTop"><input type="checkbox" ${selectedCommandIds.has(c.id)?'checked':''} ${editable?'':'disabled title="時間変更の対象外"'}><code></code><span class="lineNo">L${c.line}</span></div><div class="muted">${labelKind(c.kind)} / ${signText} / ${d}${c.inline?' / 本文内':''}</div>`;div.querySelector('code').textContent=c.kind==='rhythm'?'、、':c.raw.trim();const cb=div.querySelector('input');cb.onchange=()=>{if(cb.checked)selectedCommandIds.add(c.id);else selectedCommandIds.delete(c.id);div.classList.toggle('selected',cb.checked);updateSelectedCount();updateBatchHint()};div.appendChild(contextHTML(c));div.addEventListener('click',e=>{if(e.target.tagName!=='INPUT')gotoLine(c.line)});box.appendChild(div)});updateSelectedCount()}
-function labelKind(k){return ({wait:'w 待機',rhythm:'、、 リズム待機',comma:'、 クリック待ち',period:'。 クリック待ち＋改ページ',br:'br 表示用空行',char:'立ち絵',illust:'イラスト',bg:'背景',bgm:'BGM',se:'SE',voice:'VOICE',pict:'全画像透過'})[k]||k}
+function renderCommands(){const box=$('commandList');box.innerHTML='';const list=lastCommands.filter(matchesFilter);if(!list.length){box.innerHTML='<div class="empty">現在の検索条件に一致するコマンドはありません。</div>';updateSelectedCount();return}list.slice(0,500).forEach(c=>{const editable=isTimeEditable(c);let d='';if(c.kind==='rhythm')d='固定 0.5秒';else if(c.kind==='comma')d='クリック待ち';else if(c.kind==='period')d='クリック待ち＋改ページ';else if(c.kind==='autopage')d='待たずに改ページ';else if(c.kind==='shake')d=`${c.target==='bg'?'背景だけ':'シーン全体'}を揺らす / ${c.duration}秒 / 強さ ${c.strength}`;else if(c.kind==='br')d='表示用空行';else if(c.kind==='pict'&&c.duration==null){const fd=fadeDefaults();d=`時間省略 → 背景 ${fd.bg}秒 / 立ち絵 ${fd.char}秒 / イラスト ${fd.illust}秒`}else if(c.duration==null&&['bg','char','illust','bgm','se','voice'].includes(c.kind))d=`時間省略 → 実効 ${effectiveDuration(c)}秒`;else if(c.duration==null)d='時間省略';else d=`${c.duration}秒`;const signText=c.sign?`符号 ${c.sign}`:'符号なし';const div=document.createElement('div');div.className='commandRow'+(selectedCommandIds.has(c.id)?' selected':'');div.innerHTML=`<div class="rowTop"><input type="checkbox" ${selectedCommandIds.has(c.id)?'checked':''} ${editable?'':'disabled title="時間変更の対象外"'}><code></code><span class="lineNo">L${c.line}</span></div><div class="muted">${labelKind(c.kind)} / ${signText} / ${d}${c.inline?' / 本文内':''}</div>`;div.querySelector('code').textContent=c.kind==='rhythm'?'、、':c.kind==='autopage'?'。。':c.raw.trim();const cb=div.querySelector('input');cb.onchange=()=>{if(cb.checked)selectedCommandIds.add(c.id);else selectedCommandIds.delete(c.id);div.classList.toggle('selected',cb.checked);updateSelectedCount();updateBatchHint()};div.appendChild(contextHTML(c));div.addEventListener('click',e=>{if(e.target.tagName!=='INPUT')gotoLine(c.line)});box.appendChild(div)});updateSelectedCount()}
+function labelKind(k){return ({wait:'w 待機',rhythm:'、、 リズム待機',comma:'、 クリック待ち',period:'。 クリック待ち＋改ページ',autopage:'。。 待たずに改ページ',shake:'shake 揺れ',br:'br 表示用空行',char:'立ち絵',illust:'イラスト',bg:'背景',bgm:'BGM',se:'SE',voice:'VOICE',pict:'全画像透過'})[k]||k}
 function num(v,d){const n=Number(v);return Number.isFinite(n)?n:d}
-function matchesFilter(c){const k=$('filterKind').value,s=$('filterSign').value,d=$('filterDuration').value,secs=num($('filterSeconds').value,NaN);if(!['wait','rhythm','comma','period','br','char','illust','bg','bgm','se','voice','pict'].includes(c.kind))return false;
+function matchesFilter(c){const k=$('filterKind').value,s=$('filterSign').value,d=$('filterDuration').value,secs=num($('filterSeconds').value,NaN);if(!['wait','rhythm','comma','period','autopage','shake','br','char','illust','bg','bgm','se','voice','pict'].includes(c.kind))return false;
   if(k==='time'&&!isTimeEditable(c))return false;
   if(k==='fade'&&!isFadeKind(c))return false;
   if(!['all','time','fade'].includes(k)&&c.kind!==k)return false;
@@ -283,20 +307,83 @@ function matchesFilter(c){const k=$('filterKind').value,s=$('filterSign').value,
   if(d==='exact'&&!(isTimeEditable(c)&&c.duration!=null&&Number.isFinite(secs)&&Math.abs(c.duration-secs)<1e-9))return false;
   return true}
 function updateSelectedCount(){const n=[...selectedCommandIds].filter(id=>lastCommands.some(c=>c.id===id)).length;$('selectedCount').textContent=`${n}件選択`}
-function updateBatchHint(){const visible=lastCommands.filter(matchesFilter),selected=visible.filter(c=>selectedCommandIds.has(c.id)&&isTimeEditable(c));const waitN=visible.filter(c=>c.kind==='wait').length,omitN=visible.filter(c=>isFadeKind(c)&&c.duration==null).length;$('batchHint').textContent=`検索結果 ${visible.length}件（w ${waitN}件 / 時間省略 ${omitN}件）・時間変更チェック済み ${selected.length}件。時間省略はv54のカテゴリ別基本値を表示します。-pict省略時は背景・立ち絵・イラストで実効時間が異なります。w は待機秒数を変更。「、、」は0.5秒以外へ変更すると w 秒数へ変換します。`;$('batchBtn').disabled=!selected.length}
+function updateBatchHint(){const visible=lastCommands.filter(matchesFilter),selected=visible.filter(c=>selectedCommandIds.has(c.id)&&isTimeEditable(c));const waitN=visible.filter(c=>c.kind==='wait').length,omitN=visible.filter(c=>isFadeKind(c)&&c.duration==null).length;$('batchHint').textContent=`検索結果 ${visible.length}件（w ${waitN}件 / 時間省略 ${omitN}件）・時間変更チェック済み ${selected.length}件。時間省略はv56のカテゴリ別基本値を表示します。-pict省略時は背景・立ち絵・イラストで実効時間が異なります。w は待機秒数を変更。「、、」は0.5秒以外へ変更すると w 秒数へ変換します。`;$('batchBtn').disabled=!selected.length}
 function buildCommand(c,newD){const d=String(newD);if(c.kind==='wait')return 'w '+d;if(c.kind==='rhythm')return Number(newD)===0.5?'、、':'w '+d;if(c.kind==='char')return c.sign+c.target+' '+d;if(c.kind==='illust')return c.sign+'il '+c.target+' '+d;if(c.kind==='bg')return c.sign+'bg '+d;if(c.kind==='bgm')return c.sign+'bgm '+d;if(c.kind==='pict')return '-pict '+d;return c.raw.trim()}
 function batchEdit(){scan();const newD=Math.max(0,num($('newDuration').value,0)),targets=lastCommands.filter(c=>matchesFilter(c)&&selectedCommandIds.has(c.id)&&isTimeEditable(c));if(!targets.length)return;pushHistory();const lines=normalizeNL(ta.value).split('\n');const byLine=new Map();for(const c of targets){if(!byLine.has(c.line))byLine.set(c.line,[]);byLine.get(c.line).push(c)}for(const [line,cs] of byLine){let raw=lines[line-1];for(const c of cs.sort((a,b)=>(b.colStart??0)-(a.colStart??0))){const repl=buildCommand(c,newD);if(c.kind==='rhythm'&&c.inline){raw=raw.slice(0,c.colStart)+repl+raw.slice(c.colEnd)}else{const lead=(raw.match(/^\s*/)||[''])[0],tail=(raw.match(/\s*$/)||[''])[0];raw=lead+repl+tail}}lines[line-1]=raw}ta.value=lines.join('\n');selectedCommandIds.clear();dirty=true;afterChange(true)}
 function applySafeFixes(){scan();const fixes=new Map(lastIssues.filter(x=>x.severity==='fixable'&&x.replacement).map(x=>[x.line,x]));if(!fixes.size)return;pushHistory();const lines=normalizeNL(ta.value).split('\n');for(const [line,x] of fixes){const raw=lines[line-1],lead=(raw.match(/^\s*/)||[''])[0],tail=(raw.match(/\s*$/)||[''])[0];lines[line-1]=lead+x.replacement+tail}ta.value=lines.join('\n');dirty=true;afterChange(true)}
 function updateStats(){const s=ta.value;$('editorStats').textContent=`${s?normalizeNL(s).split('\n').length:0}行 / ${s.length}文字`;$('saveState').textContent=dirty?'未保存':'保存済み';renderLineNumbers()}
 function afterChange(immediate=false){updateStats();clearTimeout(inputTimer);inputTimer=setTimeout(scan,immediate?0:220)}
+const MANUAL56=[
+ {cat:'会話',cmd:'a / b / c / d',name:'話者変更',desc:'キャラA〜Dへ話者を変更。本文がある状態で次の話者指定が来ると、クリック待ちなしで改ページして話者を切り替えます。'},
+ {cat:'会話',cmd:'p',name:'主人公名へ変更',desc:'主人公・プレイヤー名を話者にします。'},
+ {cat:'会話',cmd:'@名前 / ＠名前',name:'任意話者',desc:'任意の表示名へ話者変更。@ / ＠ 単独では話者名を消します。'},
+ {cat:'会話',cmd:'!a / !b / !c / !d',name:'手動バウンス',desc:'指定立ち絵を手動でバウンス。全角！も使用できます。'},
+ {cat:'会話',cmd:'? / ？',name:'自動バウンス取消',desc:'そのページの自動バウンスを取り消します。'},
+ {cat:'待ち・ページ',cmd:'、',name:'クリック待ち',desc:'単独行のみ。クリックされるまで待ちます。'},
+ {cat:'待ち・ページ',cmd:'。',name:'クリック待ち＋改ページ',desc:'単独行のみ。クリック待ち後にページを切り替えます。'},
+ {cat:'待ち・ページ',cmd:'。。',name:'待たずに改ページ',desc:'v56追加。単独行のみ特殊記法。クリック待ちを入れずにページを切り替えます。'},
+ {cat:'待ち・ページ',cmd:'、、',name:'0.5秒ウェイト',desc:'単独行のみ。クリック待ちはせず、文章表示のリズム用に0.5秒待機します。'},
+ {cat:'待ち・ページ',cmd:'w 1',name:'任意秒ウェイト',desc:'指定秒数だけ待ちます。w と数値の間は半角スペース。'},
+ {cat:'待ち・ページ',cmd:'br',name:'表示用空行',desc:'単独行。ゲーム本文に空行を表示します。[br] は互換記法です。'},
+ {cat:'画像表示',cmd:'+a / -a',name:'立ち絵表示・透過',desc:'Aを表示 / 非表示。+ab / -cd 1 のように複数スロットと秒数を指定できます。'},
+ {cat:'画像表示',cmd:'+bg / -bg',name:'背景表示・透過',desc:'背景を表示 / 非表示。秒数省略時はプロジェクトの背景基本フェードを使用します。'},
+ {cat:'画像表示',cmd:'+il a / -il ab 1',name:'イラスト表示・透過',desc:'イラストA〜Dの表示状態を変更。複数指定可能。'},
+ {cat:'画像表示',cmd:'-pict / -pict 1',name:'全画像透過',desc:'背景・立ち絵A〜D・イラストA〜Dをまとめて非表示。準備状態は保持。時間省略時はカテゴリ別基本フェード。'},
+ {cat:'素材準備',cmd:'[bg 識別名] / [bg off]',name:'背景準備 / 解除',desc:'登録背景を準備。off は画面から外します。'},
+ {cat:'素材準備',cmd:'[chara a 識別名] / [chara a off]',name:'立ち絵準備 / 解除',desc:'指定スロットへ登録立ち絵を準備。'},
+ {cat:'素材準備',cmd:'[il a 識別名] / [il a off]',name:'イラスト準備 / 解除',desc:'指定スロットへ登録イラストを準備。'},
+ {cat:'素材準備',cmd:'[layer a 4]',name:'レイヤー変更',desc:'立ち絵スロットのレイヤー順を変更します。'},
+ {cat:'音',cmd:'[bgm 識別名] / [se 識別名] / [voice 識別名]',name:'音声準備',desc:'登録済みのBGM / SE / VOICEを準備します。'},
+ {cat:'音',cmd:'+bgm / -bgm',name:'BGM再生 / 停止',desc:'時間省略時は0秒。必要なら +bgm 1 / -bgm 1 のように明示します。'},
+ {cat:'音',cmd:'+se / -se / +voice / -voice',name:'SE・VOICE再生 / 停止',desc:'準備したSE / VOICEを再生・停止します。'},
+ {cat:'演出',cmd:'[dark] / [light]',name:'暗転 / 明転',desc:'画面の暗転・明転。省略時は1秒。'},
+ {cat:'演出',cmd:'[shake] / [shake 0.5 5]',name:'シーン全体を揺らす',desc:'画面全体を揺らします。数値は時間・強さ。'},
+ {cat:'演出',cmd:'[shake bg] / [shake bg 0.5 5]',name:'背景だけ揺らす',desc:'v56追加。背景だけを揺らします。数値は時間・強さ。'},
+ {cat:'演出',cmd:'[flash] / [zoomIn] / [zoomOut]',name:'画面エフェクト',desc:'Studioのエフェクト系コマンド。用途に応じて使用します。'},
+ {cat:'フロー',cmd:'[label 名前]',name:'ラベル',desc:'ジャンプ先となるラベルを定義します。'},
+ {cat:'フロー',cmd:'[jump 名前]',name:'ジャンプ',desc:'指定ラベルへ移動します。'},
+ {cat:'フロー',cmd:'[choice] ...',name:'選択肢',desc:'選択肢ブロック。表示文とジャンプ先を定義します。'},
+ {cat:'フロー',cmd:'[var ...] / [if ...]',name:'変数・条件分岐',desc:'変数操作と条件分岐。{{変数名}} で本文へ値を展開できます。'},
+ {cat:'フロー',cmd:'[end]',name:'終了',desc:'シナリオを終了します。'},
+ {cat:'制作',cmd:'//コメント',name:'制作コメント',desc:'ゲーム実行時は無視される制作メモ。'},
+ {cat:'制作',cmd:'---',name:'ブロック区切り',desc:'Script TXT上でブロックを区切ります。'},
+ {cat:'制作',cmd:'[text]',name:'空の文章ブロック',desc:'Project Textで空文章ブロックを保持するための記法。'}
+];
+let manualCat='すべて';
+function renderManual(){const q=($('manualSearch')?.value||'').trim().toLowerCase(),cats=['すべて',...new Set(MANUAL56.map(x=>x.cat))],tabs=$('manualTabs'),grid=$('manualGrid');if(!tabs||!grid)return;tabs.innerHTML='';for(const c of cats){const b=document.createElement('button');b.textContent=c;b.classList.toggle('active',c===manualCat);b.onclick=()=>{manualCat=c;renderManual()};tabs.appendChild(b)}const rows=MANUAL56.filter(x=>(manualCat==='すべて'||x.cat===manualCat)&&(!q||[x.cat,x.cmd,x.name,x.desc].join(' ').toLowerCase().includes(q)));grid.innerHTML='';if(!rows.length){grid.innerHTML='<div class="manualEmpty">一致する項目はありません。</div>';return}for(const x of rows){const d=document.createElement('div');d.className='manualItem';const code=document.createElement('code');code.textContent=x.cmd;const b=document.createElement('b');b.textContent=x.name;const p=document.createElement('p');p.textContent=x.desc;const tag=document.createElement('div');tag.className='tag';tag.textContent=x.cat;d.append(code,b,p,tag);grid.appendChild(d)}}
+function openManual(){$('manualOverlay').classList.add('open');$('manualOverlay').setAttribute('aria-hidden','false');renderManual();setTimeout(()=>$('manualSearch').focus(),0)}
+function closeManual(){$('manualOverlay').classList.remove('open');$('manualOverlay').setAttribute('aria-hidden','true')}
 ta.addEventListener('input',()=>{dirty=true;afterChange(false)});ta.addEventListener('scroll',syncGutterScroll);['click','keyup','select'].forEach(ev=>ta.addEventListener(ev,renderLineNumbers));
 $('scanBtn').onclick=scan;$('fixSafeBtn').onclick=applySafeFixes;$('batchBtn').onclick=batchEdit;$('applyCheckedIssues').onclick=applyCheckedIssueFixes;$('clearIssueChecks').onclick=()=>{selectedIssueFixIds.clear();render()};$('clearIgnoredIssues').onclick=()=>{if(!ignoredIssueIds.size||confirm('見送りにした項目をすべて再表示しますか？')){ignoredIssueIds.clear();saveIgnoredIssues();render()}};$('showIgnoredIssues').onchange=render;
 ['filterKind','filterSign','filterDuration'].forEach(id=>$(id).onchange=()=>{renderCommands();updateBatchHint()});$('filterSeconds').oninput=()=>{renderCommands();updateBatchHint()};$('checkFiltered').onclick=()=>{lastCommands.filter(c=>matchesFilter(c)&&isTimeEditable(c)).forEach(c=>selectedCommandIds.add(c.id));renderCommands();updateBatchHint()};$('uncheckAll').onclick=()=>{selectedCommandIds.clear();renderCommands();updateBatchHint()};$('strictAscii').onchange=scan;
-$('textSearch').oninput=renderTextSearch;$('searchCase').onchange=renderTextSearch;$('textSearchClear').onclick=()=>{$('textSearch').value='';renderTextSearch()};
+$('textSearch').oninput=renderTextSearch;$('searchCase').onchange=renderTextSearch;$('textSearchClear').onclick=()=>{$('textSearch').value='';renderTextSearch()};$('findNextBtn').onclick=findNextMatch;$('replaceOneBtn').onclick=replaceOne;$('replaceAllBtn').onclick=replaceAll;$('manualBtn').onclick=openManual;$('manualClose').onclick=closeManual;$('manualSearch').oninput=renderManual;$('manualOverlay').addEventListener('click',e=>{if(e.target===$('manualOverlay'))closeManual()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('manualOverlay').classList.contains('open'))closeManual()});
 ['paramKind','paramSlot'].forEach(id=>$(id).onchange=renderParams);$('paramQuery').oninput=renderParams;
 $('undoBtn').onclick=()=>{if(!undo.length)return;redo.push(ta.value);ta.value=undo.pop();dirty=true;afterChange(true);updateUndo()};$('redoBtn').onclick=()=>{if(!redo.length)return;undo.push(ta.value);ta.value=redo.pop();dirty=true;afterChange(true);updateUndo()};
+
+async function copyAllScript(){
+  try{
+    await navigator.clipboard.writeText(ta.value||'');
+    const b=$('copyAllBtn');if(b){const old=b.textContent;b.textContent='✓ コピーしました';setTimeout(()=>b.textContent=old,1200)}
+  }catch(err){
+    try{ta.focus();ta.select();const ok=document.execCommand&&document.execCommand('copy');ta.setSelectionRange(ta.value.length,ta.value.length);if(ok)return}catch(_){}
+    alert('クリップボードへコピーできませんでした。ブラウザの権限設定をご確認ください。');
+  }
+}
+async function pasteAllScript(){
+  let txt='';
+  try{txt=await navigator.clipboard.readText()}catch(err){alert('クリップボードを読み取れませんでした。ブラウザの権限設定をご確認ください。');return}
+  if(txt==null)return;
+  if(ta.value&&!confirm('現在の本文を、クリップボードの内容で丸ごと置き換えますか？\nUndoで元に戻せます。'))return;
+  // Full Project Text pasted here is accepted too; split header/META exactly like file open.
+  if(/^﻿?#!tatenovel-script\s+v=/i.test(String(txt).trimStart())){
+    try{pushUndo();loadDocumentRaw(txt);dirty=true;afterChange(true);updateUndo();return}catch(err){alert(err?.message==='META_PARSE'?'貼り付け内容のMETA JSONを解析できませんでした。':'貼り付けたScript TXTを解析できませんでした。');return}
+  }
+  pushUndo();ta.value=String(txt).replace(/\r\n?/g,'\n');dirty=true;afterChange(true);updateUndo();
+}
+$('copyAllBtn').onclick=copyAllScript;
+$('pasteAllBtn').onclick=pasteAllScript;
 $('clearBtn').onclick=()=>{if(!ta.value||confirm('編集中のスクリプトをクリアしますか？')){projectEnvelope={mode:'plain',header:'',metaBegin:'',metaEnd:'',metaText:'',meta:null,version:0,charAnchor:0};setText('');projectTextInfo()}};
-$('fileOpen').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{loadDocumentRaw(await f.text());$('sourceFileName').value=f.name;updateOutputName()}catch(err){if(err?.message==='META_PARSE')alert('v54 Script TXTのMETA JSONを解析できませんでした。ファイルは開いていません。');else alert('TXTを読み込めませんでした。')}e.target.value=''};
+$('fileOpen').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{loadDocumentRaw(await f.text());$('sourceFileName').value=f.name;updateOutputName()}catch(err){if(err?.message==='META_PARSE')alert('v56 Script TXTのMETA JSONを解析できませんでした。ファイルは開いていません。');else alert('TXTを読み込めませんでした。')}e.target.value=''};
 $('saveBtn').onclick=()=>{const name=outputFileName();if(!name){$('sourceFileName').focus();alert('元ファイル名を入力してください。TXTを開いた場合は自動入力されます。コピペの場合は任意の元ファイル名を入力してください。');return}const blob=new Blob(['\uFEFF'+composeProjectText()],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},0);dirty=false;updateStats()};
 ta.addEventListener('paste',e=>{const txt=e.clipboardData?.getData('text/plain')||'';if(/^\uFEFF?#!tatenovel-script\s+v=/i.test(txt.trimStart())&&(!ta.value||confirm('貼り付けたScript TXTのヘッダー・METAを分離して読み込みますか？'))){e.preventDefault();try{loadDocumentRaw(txt)}catch(err){alert(err?.message==='META_PARSE'?'貼り付け内容のMETA JSONを解析できませんでした。':'貼り付けたScript TXTを解析できませんでした。')}}});
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
